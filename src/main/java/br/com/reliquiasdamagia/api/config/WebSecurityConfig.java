@@ -36,11 +36,21 @@ public class WebSecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeRequests(authz -> authz
+
+                        //usuarios
                         .requestMatchers(HttpMethod.POST, "/api/users/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/users/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/users/**").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasAuthority("ADMIN")
-                        .requestMatchers("/api/users/self/**").hasAnyRole("USER", "CONSULTANT", "ADMIN")
+                        .requestMatchers("/api/users/self/**").hasAnyAuthority("USER", "CONSULTANT", "ADMIN")
+
+                        //produtos
+                        .requestMatchers(HttpMethod.POST, "/api/products/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/products/**").hasAnyAuthority("USER", "CONSULTANT", "ADMIN")
+                        .requestMatchers("/api/shopping-cart/**").hasAnyAuthority("USER", "CONSULTANT")
+                        .requestMatchers("/api/shopping-cart/abandoned").hasAuthority("ADMIN")
+
+                        //autenticação
                         .anyRequest().authenticated())
                 .exceptionHandling(exceptionHandling ->
                         exceptionHandling.authenticationEntryPoint(jwtAuthenticationEntryPoint));
