@@ -5,8 +5,8 @@ import br.com.reliquiasdamagia.api.repository.ShoppingCartRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -57,6 +57,11 @@ public class ShoppingCartService {
         return shoppingCartRepository.save(cart);
     }
 
+    public ShoppingCart getCartById(Long cartId) {
+        return shoppingCartRepository.findById(cartId)
+                .orElseThrow(() -> new RuntimeException("Carrinho não encontrado com ID: " + cartId));
+    }
+
     public ShoppingCart removeItemFromCart(Long cartId, Long itemId) {
         ShoppingCart cart = shoppingCartRepository.findById(cartId)
                 .orElseThrow(() -> new RuntimeException("Carrinho não encontrado com o id " + cartId));
@@ -71,10 +76,6 @@ public class ShoppingCartService {
         return shoppingCartRepository.save(cart);
     }
 
-    public void processPayment(Long cartId, BigDecimal amount) {
-        // Configuração e chamada à API do MercadoPago
-        // Atualiza status para `PROCESSANDO` ou `FINALIZADO` baseado na resposta
-    }
 
     public void updateCartStatus(Long cartId, Status status) {
         ShoppingCart cart = shoppingCartRepository.findById(cartId)
@@ -84,4 +85,13 @@ public class ShoppingCartService {
         cart.setLastModified(LocalDateTime.now());
         shoppingCartRepository.save(cart);
     }
+
+    public List<ShoppingCart> getAbandonedCarts() {
+        return shoppingCartRepository.findByStatus(Status.ABANDONED);
+    }
+
+//    public void processPayment(Long cartId, BigDecimal amount) {
+//        // Configuração e chamada à API do MercadoPago
+//        // Atualiza status para `PROCESSANDO` ou `FINALIZADO` baseado na resposta
+//    }
 }

@@ -2,15 +2,14 @@ package br.com.reliquiasdamagia.api.controller;
 
 import br.com.reliquiasdamagia.api.entity.Product;
 import br.com.reliquiasdamagia.api.service.ProductService;
-import jakarta.validation.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.config.ConfigDataResourceNotFoundException;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import jakarta.validation.ConstraintViolationException;
+import org.springframework.boot.context.config.ConfigDataResourceNotFoundException;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,17 +29,14 @@ public class ProductController {
             Product newProduct = productService.createProduct(product);
             return ResponseEntity.ok("Produto criado com sucesso!\n" + newProduct);
 
-        } catch (AuthenticationException e) {  // Para falhas de autenticação
+        } catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("Erro de autenticação: você precisa estar autenticado para realizar esta ação.");
 
-        } catch (AccessDeniedException e) {  // Para falhas de autorização
+        } catch (AccessDeniedException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body("Erro de autorização: você não tem permissão para realizar esta ação.");
 
-        } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Erro de integridade dos dados: " + e.getMessage());
 
         } catch (ConstraintViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -93,10 +89,6 @@ public class ProductController {
         } catch (AccessDeniedException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body("Erro de autorização: você não tem permissão para realizar esta ação.");
-
-        } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Erro de integridade dos dados: " + e.getMessage());
 
         } catch (ConstraintViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
