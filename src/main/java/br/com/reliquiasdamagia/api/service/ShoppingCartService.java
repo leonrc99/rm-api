@@ -5,7 +5,6 @@ import br.com.reliquiasdamagia.api.repository.ShoppingCartRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.lang.module.ResolutionException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -58,7 +57,7 @@ public class ShoppingCartService {
         return shoppingCartRepository.save(cart);
     }
 
-    public void removeItemFromCart(Long cartId, Long itemId) {
+    public ShoppingCart removeItemFromCart(Long cartId, Long itemId) {
         ShoppingCart cart = shoppingCartRepository.findById(cartId)
                 .orElseThrow(() -> new RuntimeException("Carrinho não encontrado com o id " + cartId));
 
@@ -68,7 +67,8 @@ public class ShoppingCartService {
                 .orElseThrow(() -> new RuntimeException("Item não encontrado no carrinho com o id " + itemId));
 
         cart.getItems().remove(itemToRemove);
-        shoppingCartRepository.save(cart);
+
+        return shoppingCartRepository.save(cart);
     }
 
     public void processPayment(Long cartId, BigDecimal amount) {

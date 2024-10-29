@@ -45,9 +45,11 @@ public class WebSecurityConfig {
                         .requestMatchers("/api/users/self/**").hasAnyAuthority("USER", "CONSULTANT", "ADMIN")
 
                         //produtos
+                        .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/products/**").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/products/**").hasAnyAuthority("USER", "CONSULTANT", "ADMIN")
-                        .requestMatchers("/api/shopping-cart/**").hasAnyAuthority("USER", "CONSULTANT")
+                        .requestMatchers(HttpMethod.PUT, "/api/products/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasAuthority("ADMIN")
+                        .requestMatchers("/api/shopping-cart/**").hasAnyAuthority("USER", "CONSULTANT", "ADMIN")
                         .requestMatchers("/api/shopping-cart/abandoned").hasAuthority("ADMIN")
 
                         //autenticação

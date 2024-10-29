@@ -36,6 +36,8 @@ public class ProductService {
     }
 
     public void deleteProduct(Long id) {
+        new RuntimeException("Produto excluído com sucesso! " + productRepository.findById(id));
+
         productRepository.deleteById(id);
     }
 }
