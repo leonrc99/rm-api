@@ -1,21 +1,24 @@
 package br.com.reliquiasdamagia.api.service;
 
 import br.com.reliquiasdamagia.api.entity.User;
+import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Data
 public class UserDetailsImpl implements UserDetails {
+    private Long id;
     private String email; // Será usado como identificador no login
     private String password;
     private Collection<? extends GrantedAuthority> authorities;
 
-    public UserDetailsImpl(String email, String password, Collection<? extends GrantedAuthority> authorities) {
+    public UserDetailsImpl(Long id, String email, String password, Collection<? extends GrantedAuthority> authorities) {
+        this.id = id;
         this.email = email;
         this.password = password;
         this.authorities = authorities;
@@ -27,7 +30,8 @@ public class UserDetailsImpl implements UserDetails {
                 .collect(Collectors.toList());
 
         return new UserDetailsImpl(
-                user.getEmail(), // O email será o "username"
+                user.getId(),
+                user.getEmail(),
                 user.getPassword(),
                 authorities
         );
@@ -45,7 +49,7 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public String getUsername() {
-        return email; // Retorne o email como o identificador de login
+        return email;
     }
 
     @Override
