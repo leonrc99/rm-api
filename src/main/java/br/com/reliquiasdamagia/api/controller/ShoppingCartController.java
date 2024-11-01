@@ -1,14 +1,15 @@
 package br.com.reliquiasdamagia.api.controller;
 
-import br.com.reliquiasdamagia.api.entity.CartItem;
 import br.com.reliquiasdamagia.api.entity.ShoppingCart;
 import br.com.reliquiasdamagia.api.entity.Status;
 import br.com.reliquiasdamagia.api.entity.User;
 import br.com.reliquiasdamagia.api.service.ShoppingCartService;
+import br.com.reliquiasdamagia.api.service.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.boot.context.config.ConfigDataResourceNotFoundException;
 import org.springframework.security.access.AccessDeniedException;
@@ -29,10 +30,9 @@ public class ShoppingCartController {
     @PreAuthorize("hasAnyAuthority('USER', 'CONSULTANT')")
     public ResponseEntity<String> createCart(@AuthenticationPrincipal User user) {
         try {
-            ShoppingCart newCart = cartService.createCart(user);
+            ShoppingCart newCart = cartService.createCart(user.getId());
             return ResponseEntity.ok("Carrinho criado com sucesso\n" + newCart);
-        } catch (AccessDeniedException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+        } catch (AccessDeniedException e) {            return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body("Erro de autorização: você não tem permissão para realizar esta ação.");
 
         } catch (AuthenticationException e) {
@@ -50,31 +50,30 @@ public class ShoppingCartController {
     }
 
     // Endpoint para adicionar item ao carrinho (acessível para USER e CONSULTANT)
-    @PostMapping("/{cartId}/add-item")
+    @PostMapping("/add-item")
     @PreAuthorize("hasAnyAuthority('USER', 'CONSULTANT')")
-    public ResponseEntity<String> addItemToCart(@PathVariable Long cartId, @RequestBody CartItem item) {
+    public ResponseEntity<String> addItemToCart(
+            @RequestParam Long productId,
+            @RequestParam Integer quantity,
+            Authentication authentication
+    ) {
         try {
-            ShoppingCart updatedCart = cartService.addItemToCart(cartId, item.getProduct(), item.getQuantity());
-            return ResponseEntity.ok("Produto adicionado ao carrinho:\n" + updatedCart);
+            Long userId = getUserIdFromAuthentication(authentication);
 
+            ShoppingCart updatedCart = cartService.addItemToCart(userId, productId, quantity);
+            return ResponseEntity.ok("Produto adicionado ao carrinho:\n" + updatedCart);
         } catch (AccessDeniedException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body("Erro de autorização: você não tem permissão para realizar esta ação.");
-
+                    .body("Erro de autorização: você não tem permissão para realizar esta ação.");
         } catch (AuthenticationException e) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body("Erro de autenticação: você precisa estar autenticado para realizar esta ação.");
-
-        } catch (ConfigDataResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Recurso não encontrado: " + e.getMessage());
-
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Erro de autenticação: você precisa estar autenticado para realizar esta ação.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Erro ao adicionar o produto: " + e.getMessage());
         }
     }
-
+    
     // Endpoint para obter carrinhos abandonados (apenas ADMIN)
     @GetMapping("/abandoned")
     @PreAuthorize("hasRole('ADMIN')")
@@ -177,11 +176,11 @@ public class ShoppingCartController {
         }
     }
 
-//    // Endpoint para processar pagamento (acessível para USER e CONSULTANT)
-//    @PreAuthorize("hasAnyAuthority('USER', 'CONSULTANT')")
-//    @PostMapping("/{cartId}/checkout")
-//    public ResponseEntity<?> processPayment(@PathVariable Long cartId, @RequestParam BigDecimal amount) {
-//        cartService.processPayment(cartId, amount);
-//        return ResponseEntity.ok("Pagamento processado com sucesso.");
-//    }
+
+    private Long getUserIdFromAuthentication(Authentication authentication) {
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        return userDetails.getId();
+    }
 }
+
+//    public ResponseEntity<?> processPayment(@PathVariable Long cartId, @RequestParam BigDecimal amount) {}

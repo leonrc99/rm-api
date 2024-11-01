@@ -54,9 +54,4 @@ public class User {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
-
-    public Set<Role> getRoles() {
-        return roles;
-    }
-
 }

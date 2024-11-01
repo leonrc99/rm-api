@@ -1,6 +1,7 @@
 package br.com.reliquiasdamagia.api.service;
 
 import br.com.reliquiasdamagia.api.entity.*;
+import br.com.reliquiasdamagia.api.repository.ProductRepository;
 import br.com.reliquiasdamagia.api.repository.ShoppingCartRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,25 +15,41 @@ public class ShoppingCartService {
     @Autowired
     private ShoppingCartRepository shoppingCartRepository;
 
-    public ShoppingCart createCart(User user) {
+    @Autowired
+    private ProductRepository productRepository;
+
+    public ShoppingCart createCart(Long userId) {
         ShoppingCart cart = new ShoppingCart();
-        cart.setUser(user);
+        cart.setUserId(userId);
+        cart.setStatus(Status.DRAFT);
 
         return shoppingCartRepository.save(cart);
     }
 
-    public ShoppingCart addItemToCart(Long cartId, Product product, Integer quantity) {
-        ShoppingCart cart = shoppingCartRepository.findById(cartId)
-                .orElseThrow(() -> new RuntimeException("Carrinho não encontrado"));
+    // Metodo para buscar um carrinho em status "DRAFT" para o usuário
+    private Optional<ShoppingCart> getDraftCartForUser(Long userId) {
+        return shoppingCartRepository.findByUserIdAndStatus(userId, Status.DRAFT);
+    }
 
+    public ShoppingCart addItemToCart(Long userId, Long productId, Integer quantity) {
+        // Tenta obter um carrinho com status "DRAFT" para o usuário
+        ShoppingCart cart = getDraftCartForUser(userId)
+                .orElseGet(() -> createCart(userId)); // Cria um novo carrinho caso não exista um em status "DRAFT"
+
+        // Busca o produto pelo ID
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado com o ID: " + productId));
+
+        // Verifica se o item já está no carrinho
         Optional<CartItem> existingItem = cart.getItems().stream()
-                .filter(item -> item.getProduct().getId().equals(product.getId()))
+                .filter(item -> item.getProduct().getId().equals(productId))
                 .findFirst();
 
-        if (existingItem.isPresent()){
+        if (existingItem.isPresent()) {
             CartItem item = existingItem.get();
             int newQuantity = item.getQuantity() + quantity;
 
+            // Verifica o estoque do produto
             if (newQuantity > product.getStock()) {
                 throw new RuntimeException("Quantidade solicitada excede o estoque disponível.");
             }
@@ -44,7 +61,6 @@ public class ShoppingCartService {
             }
 
             CartItem newItem = new CartItem();
-
             newItem.setProduct(product);
             newItem.setQuantity(quantity);
             newItem.setShoppingCart(cart);
@@ -53,7 +69,6 @@ public class ShoppingCartService {
         }
 
         cart.setLastModified(LocalDateTime.now());
-
         return shoppingCartRepository.save(cart);
     }
 
@@ -90,8 +105,7 @@ public class ShoppingCartService {
         return shoppingCartRepository.findByStatus(Status.ABANDONED);
     }
 
-//    public void processPayment(Long cartId, BigDecimal amount) {
-//        // Configuração e chamada à API do MercadoPago
-//        // Atualiza status para `PROCESSANDO` ou `FINALIZADO` baseado na resposta
-//    }
 }
+
+
+//    public void processPayment(Long cartId, BigDecimal amount) {}

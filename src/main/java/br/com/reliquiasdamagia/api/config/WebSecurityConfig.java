@@ -31,6 +31,7 @@ public class WebSecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        //noinspection deprecation
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session
@@ -50,6 +51,7 @@ public class WebSecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/products/**").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasAuthority("ADMIN")
                         .requestMatchers("/api/shopping-cart/**").hasAnyAuthority("USER", "CONSULTANT", "ADMIN")
+                        .requestMatchers("/api/shopping-cart/add-item").hasAnyAuthority("USER", "CONSULTANT")
                         .requestMatchers("/api/shopping-cart/abandoned").hasAuthority("ADMIN")
 
                         //autenticação

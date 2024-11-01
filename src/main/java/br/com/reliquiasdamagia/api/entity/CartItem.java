@@ -3,6 +3,7 @@ package br.com.reliquiasdamagia.api.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
+import lombok.ToString;
 
 @Data
 @Entity
@@ -19,5 +20,6 @@ public class CartItem {
     private Integer quantity;
 
     @ManyToOne
+    @ToString.Exclude
     private ShoppingCart shoppingCart;
 }

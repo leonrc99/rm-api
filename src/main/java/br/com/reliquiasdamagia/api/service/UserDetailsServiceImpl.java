@@ -1,9 +1,7 @@
 package br.com.reliquiasdamagia.api.service;
 
 
-import br.com.reliquiasdamagia.api.entity.Role;
 import br.com.reliquiasdamagia.api.entity.User;
-import br.com.reliquiasdamagia.api.repository.RoleRepository;
 import br.com.reliquiasdamagia.api.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -13,7 +11,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,9 +19,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private RoleRepository roleRepository;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -35,6 +29,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .map(role -> new SimpleGrantedAuthority(role.getName()))
                 .collect(Collectors.toList());
 
-        return new UserDetailsImpl(user.getEmail(), user.getPassword(), authorities);
+        return new UserDetailsImpl(user.getId(), user.getEmail(), user.getPassword(), authorities);
     }
 }

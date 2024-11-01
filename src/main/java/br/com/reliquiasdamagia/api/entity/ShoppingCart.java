@@ -2,6 +2,7 @@ package br.com.reliquiasdamagia.api.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -19,10 +20,10 @@ public class ShoppingCart {
     private Status status = Status.DRAFT;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "shoppingCart")
+    @ToString.Exclude
     private List<CartItem> items = new ArrayList<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private User user;
+    private Long userId;
 
     private LocalDateTime lastModified = LocalDateTime.now();
 }
